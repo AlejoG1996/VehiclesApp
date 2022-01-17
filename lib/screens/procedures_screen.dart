@@ -1,13 +1,17 @@
 import 'dart:convert';
 
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:vehicle_app/components/loader_component.dart';
+import 'package:vehicle_app/helpers/api_helper.dart';
 import 'package:vehicle_app/helpers/constans.dart';
 import 'package:vehicle_app/models/procedure.dart';
+import 'package:vehicle_app/models/response.dart';
 import 'package:vehicle_app/models/token.dart';
 
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:vehicle_app/screens/procedure_screen.dart';
 
 class ProceduresScreem extends StatefulWidget {
   final Token token;
@@ -42,7 +46,15 @@ class _ProceduresScreemState extends State<ProceduresScreem> {
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => ProcedureScreen(
+                        token: widget.token,
+                        procedure: Procedure(description: '', id: 0, price: 0),
+                      )));
+        },
       ),
     );
   }
@@ -51,27 +63,27 @@ class _ProceduresScreemState extends State<ProceduresScreem> {
     setState(() {
       _showLoader = true;
     });
-    var url = Uri.parse('${Constans.apiUrl}/api/Procedures');
-    var response = await http.get(
-      url,
-      headers: {
-        'content-type': 'application/json',
-        'accept': 'application/json',
-        'authorization': 'bearer ${widget.token.token}',
-      },
-    );
+
+    Response response = await ApiHelper.getProcedures(widget.token.token);
 
     setState(() {
       _showLoader = false;
     });
 
-    var body = response.body;
-    var decodedJson = jsonDecode(body);
-    if (decodedJson != null) {
-      for (var item in decodedJson) {
-        _procedure.add(Procedure.fromJson(item));
-      }
+    if (!response.isSucces) {
+      await showAlertDialog(
+          context: context,
+          title: 'Error',
+          message: response.message,
+          actions: <AlertDialogAction>[
+            AlertDialogAction(key: null, label: 'Aceptar'),
+          ]);
+      return;
     }
+
+    setState(() {
+      _procedure = response.result;
+    });
   }
 
   Widget _getContent() {
@@ -95,7 +107,15 @@ class _ProceduresScreemState extends State<ProceduresScreem> {
       children: _procedure.map((e) {
         return Card(
           child: InkWell(
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ProcedureScreen(
+                            token: widget.token,
+                            procedure: e,
+                          )));
+            },
             child: Container(
               margin: EdgeInsets.all(10),
               padding: EdgeInsets.all(5),
@@ -107,7 +127,7 @@ class _ProceduresScreemState extends State<ProceduresScreem> {
                       Text(
                         e.description,
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 20,
                         ),
                       ),
                       Icon(Icons.arrow_forward_ios),
