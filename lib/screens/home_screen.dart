@@ -1,7 +1,13 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vehicle_app/models/token.dart';
+import 'package:vehicle_app/screens/brands_screen.dart';
+import 'package:vehicle_app/screens/document_types_screen.dart';
 import 'package:vehicle_app/screens/login_screen.dart';
 import 'package:vehicle_app/screens/procedures_screen.dart';
+import 'package:vehicle_app/screens/users_screen.dart';
+import 'package:vehicle_app/screens/vehicle_types_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   final Token token;
@@ -34,12 +40,19 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(150),
-            child: FadeInImage(
-              placeholder: AssetImage('assets/fuego.png'),
-              image: NetworkImage(widget.token.user.imageFullPath),
-              height: 300,
-              fit: BoxFit.cover
-            ),
+            child: 
+            CachedNetworkImage(
+              imageUrl: widget.token.user.imageFullPath ,
+              errorWidget: (context, url, error) => Icon(Icons.error),
+                fit: BoxFit.cover,
+                 height: 300,
+                width: 300,
+                placeholder: (context, url) => Image(
+                  image: AssetImage('assets/fuego.png'),
+                   fit: BoxFit.cover,
+                   height: 300,
+                width: 300,),
+             )
           ),
           SizedBox(
             height: 30,
@@ -70,30 +83,62 @@ class _HomeScreenState extends State<HomeScreen> {
           ListTile(
             leading: Icon(Icons.two_wheeler),
             title: const Text('Marcas'),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => BrandsScreen(
+                            token: widget.token,
+                          )));
+            },
           ),
           ListTile(
             leading: Icon(Icons.precision_manufacturing),
             title: const Text('Procedimientos'),
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => ProceduresScreem(token: widget.token,)));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => ProceduresScreem(
+                            token: widget.token,
+                          )));
             },
           ),
           ListTile(
             leading: Icon(Icons.badge),
             title: const Text('Tipos de Documento'),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => DocumentTypesScreen(
+                            token: widget.token,
+                          )));
+            },
           ),
           ListTile(
             leading: Icon(Icons.toys),
             title: const Text('Tipos de Vehiculos'),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => VehicleTypesScreen(
+                            token: widget.token,
+                          )));
+            },
           ),
           ListTile(
             leading: Icon(Icons.people),
             title: const Text('Usuarios'),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => UsersScreen(
+                            token: widget.token,
+                          )));
+            },
           ),
           Divider(
             color: Colors.black,
@@ -107,10 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ListTile(
             leading: Icon(Icons.logout),
             title: const Text('cerrar Sesión'),
-            onTap: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()));
-            },
+            onTap: () => _logOut(),
           ),
         ],
       ),
@@ -146,13 +188,18 @@ class _HomeScreenState extends State<HomeScreen> {
           ListTile(
             leading: Icon(Icons.logout),
             title: const Text('cerrar Sesión'),
-            onTap: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (context) => LoginScreen()));
-            },
+            onTap: () => _logOut(),
           ),
         ],
       ),
     );
+  }
+
+  void _logOut() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isRemembered', false);
+    await prefs.setString('userBody', '');
+    Navigator.pushReplacement(
+        context, MaterialPageRoute(builder: (context) => LoginScreen()));
   }
 }

@@ -1,30 +1,28 @@
-import 'dart:convert';
-
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:vehicle_app/components/loader_component.dart';
 import 'package:vehicle_app/helpers/api_helper.dart';
-import 'package:vehicle_app/helpers/constans.dart';
-import 'package:vehicle_app/models/procedure.dart';
+
+import 'package:vehicle_app/models/Vehicle_type.dart';
+
 import 'package:vehicle_app/models/response.dart';
 import 'package:vehicle_app/models/token.dart';
 
 import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
-import 'package:vehicle_app/screens/procedure_screen.dart';
+import 'package:vehicle_app/screens/vehicle_type_screen.dart';
 
-class ProceduresScreem extends StatefulWidget {
+class VehicleTypesScreen extends StatefulWidget {
   final Token token;
 
-  ProceduresScreem({required this.token});
+  VehicleTypesScreen({required this.token});
 
   @override
-  _ProceduresScreemState createState() => _ProceduresScreemState();
+  _VehicleTypesScreenState createState() => _VehicleTypesScreenState();
 }
 
-class _ProceduresScreemState extends State<ProceduresScreem> {
-  List<Procedure> _procedure = [];
+class _VehicleTypesScreenState extends State<VehicleTypesScreen> {
+  List<VehicleType> _vehicletype = [];
 
   bool _showLoader = false;
 
@@ -34,14 +32,14 @@ class _ProceduresScreemState extends State<ProceduresScreem> {
   @override
   void initState() {
     super.initState();
-    _getProcedures();
+    _getVehicleType();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Procedimientos'),
+        title: Text('Tipos de Vehiculos'),
         actions: <Widget>[
           _isFiltered
               ? IconButton(
@@ -61,7 +59,7 @@ class _ProceduresScreemState extends State<ProceduresScreem> {
     );
   }
 
-  Future<Null> _getProcedures() async {
+  Future<Null> _getVehicleType() async {
     setState(() {
       _showLoader = true;
     });
@@ -72,17 +70,16 @@ class _ProceduresScreemState extends State<ProceduresScreem> {
         _showLoader = false;
       });
       await showAlertDialog(
-        context: context,
-        title: 'Error', 
-        message: 'Verifica que estes conectado a internet.',
-        actions: <AlertDialogAction>[
+          context: context,
+          title: 'Error',
+          message: 'Verifica que estes conectado a internet.',
+          actions: <AlertDialogAction>[
             AlertDialogAction(key: null, label: 'Aceptar'),
-        ]
-      );    
+          ]);
       return;
     }
 
-    Response response = await ApiHelper.getProcedures(widget.token);
+    Response response = await ApiHelper.getVehicleType(widget.token);
 
     setState(() {
       _showLoader = false;
@@ -100,12 +97,12 @@ class _ProceduresScreemState extends State<ProceduresScreem> {
     }
 
     setState(() {
-      _procedure = response.result;
+      _vehicletype = response.result;
     });
   }
 
   Widget _getContent() {
-    return _procedure.length == 0 ? _noContent() : _getListView();
+    return _vehicletype.length == 0 ? _noContent() : _getListView();
   }
 
   Widget _noContent() {
@@ -114,8 +111,8 @@ class _ProceduresScreemState extends State<ProceduresScreem> {
         margin: EdgeInsets.all(20),
         child: Text(
           _isFiltered
-              ? 'No hay procedimientos con ese criterio de busqueda'
-              : 'No hay procedimientos registrados',
+              ? 'No hay tipo de vehiculo con ese criterio de busqueda'
+              : 'No hay tipo de vehiculo registrados',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),
@@ -124,9 +121,9 @@ class _ProceduresScreemState extends State<ProceduresScreem> {
 
   Widget _getListView() {
     return RefreshIndicator(
-      onRefresh: _getProcedures,
+      onRefresh: _getVehicleType,
       child: ListView(
-        children: _procedure.map((e) {
+        children: _vehicletype.map((e) {
           return Card(
             child: InkWell(
               onTap: () => _goEdit(e),
@@ -147,19 +144,6 @@ class _ProceduresScreemState extends State<ProceduresScreem> {
                         Icon(Icons.arrow_forward_ios),
                       ],
                     ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          '${NumberFormat.currency(symbol: '\$').format(e.price)}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
                   ],
                 ),
               ),
@@ -178,11 +162,11 @@ class _ProceduresScreemState extends State<ProceduresScreem> {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
-            title: Text('Filtrar Procedimientos'),
+            title: Text('Filtrar Tipo de Vehiculo'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text('Escriba las primeras letras del procedimiento'),
+                Text('Escriba las primeras letras del tipo de Vehiculo'),
                 SizedBox(
                   height: 10,
                 ),
@@ -212,15 +196,17 @@ class _ProceduresScreemState extends State<ProceduresScreem> {
       return;
     }
 
-    List<Procedure> filteredList = [];
-    for (var procedure in _procedure) {
-      if (procedure.description.toLowerCase().contains(_search.toLowerCase())) {
-        filteredList.add(procedure);
+    List<VehicleType> filteredList = [];
+    for (var vehicletype in _vehicletype) {
+      if (vehicletype.description
+          .toLowerCase()
+          .contains(_search.toLowerCase())) {
+        filteredList.add(vehicletype);
       }
     }
 
     setState(() {
-      _procedure = filteredList;
+      _vehicletype = filteredList;
       _isFiltered = true;
     });
 
@@ -231,32 +217,32 @@ class _ProceduresScreemState extends State<ProceduresScreem> {
     setState(() {
       _isFiltered = false;
     });
-    _getProcedures();
+    _getVehicleType();
   }
 
   void _goAdd() async {
     String? result = await Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => ProcedureScreen(
+            builder: (context) => VehicleTypeScreen(
                   token: widget.token,
-                  procedure: Procedure(description: '', id: 0, price: 0),
+                  vehicletype: VehicleType(description: '', id: 0),
                 )));
     if (result == 'yes') {
-      _getProcedures();
+      _getVehicleType();
     }
   }
 
-  void _goEdit(Procedure procedure) async {
+  void _goEdit(VehicleType vehicleType) async {
     String? result = await Navigator.push(
         context,
         MaterialPageRoute(
-            builder: (context) => ProcedureScreen(
+            builder: (context) => VehicleTypeScreen(
                   token: widget.token,
-                  procedure: procedure,
+                  vehicletype: vehicleType,
                 )));
     if (result == 'yes') {
-      _getProcedures();
+      _getVehicleType();
     }
   }
 }

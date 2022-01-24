@@ -3,59 +3,45 @@ import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
 import 'package:vehicle_app/components/loader_component.dart';
 import 'package:vehicle_app/helpers/api_helper.dart';
-import 'package:vehicle_app/models/procedure.dart';
+import 'package:vehicle_app/models/brand.dart';
 import 'package:vehicle_app/models/response.dart';
 import 'package:vehicle_app/models/token.dart';
 
-class ProcedureScreen extends StatefulWidget {
+class BrandScreen extends StatefulWidget {
   final Token token;
-  final Procedure procedure;
+  final Brand brand;
 
-  ProcedureScreen({required this.token, required this.procedure});
-
+  BrandScreen({required this.token, required this.brand});
   @override
-  _ProcedureScreenState createState() => _ProcedureScreenState();
+  _BrandScreenState createState() => _BrandScreenState();
 }
 
-class _ProcedureScreenState extends State<ProcedureScreen> {
+class _BrandScreenState extends State<BrandScreen> {
   bool _showLoader = false;
-  
 
   String _description = '';
   String _descriptionError = '';
   bool _descriptionShowError = false;
   TextEditingController _descriptionController = TextEditingController();
 
-  String _price = '';
-  String _priceError = '';
-  bool _priceShowError = false;
-  TextEditingController _priceController = TextEditingController();
-
   @override
   void initState() {
     super.initState();
-    _description = widget.procedure.description;
+    _description = widget.brand.description;
     _descriptionController.text = _description;
-    _price = widget.procedure.price.toString();
-    _priceController.text = _price;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.procedure.id == 0
-            ? 'Nuevo Procedimiento'
-            : widget.procedure.description),
+        title: Text(
+            widget.brand.id == 0 ? 'Nueva Marca' : widget.brand.description),
       ),
       body: Stack(
         children: [
           Column(
-            children: <Widget>[
-              _showDescription(),
-              _showPrice(),
-              _showButtons()
-            ],
+            children: <Widget>[_showDescription(), _showButtons()],
           ),
           _showLoader
               ? LoaderComponent(text: 'por favor espere...')
@@ -85,27 +71,6 @@ class _ProcedureScreenState extends State<ProcedureScreen> {
     );
   }
 
-  Widget _showPrice() {
-    return Container(
-      padding: EdgeInsets.all(10),
-      child: TextField(
-        keyboardType:
-            TextInputType.numberWithOptions(decimal: true, signed: false),
-        controller: _priceController,
-        decoration: InputDecoration(
-          hintText: 'Ingresa un precio...',
-          labelText: 'Precio',
-          errorText: _priceShowError ? _priceError : null,
-          suffixIcon: Icon(Icons.attach_money),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-        onChanged: (value) {
-          _price = value;
-        },
-      ),
-    );
-  }
-
   Widget _showButtons() {
     return Container(
       margin: EdgeInsets.only(left: 10, right: 10),
@@ -124,12 +89,12 @@ class _ProcedureScreenState extends State<ProcedureScreen> {
               onPressed: () => _save(),
             ),
           ),
-          widget.procedure.id == 0
+          widget.brand.id == 0
               ? Container()
               : SizedBox(
                   width: 20,
                 ),
-          widget.procedure.id == 0
+          widget.brand.id == 0
               ? Container()
               : Expanded(
                   child: ElevatedButton(
@@ -153,7 +118,7 @@ class _ProcedureScreenState extends State<ProcedureScreen> {
       return;
     }
 
-    widget.procedure.id == 0 ? _addRecord() : _saveRecord();
+    widget.brand.id == 0 ? _addRecord() : _saveRecord();
   }
 
   bool _validateFields() {
@@ -167,21 +132,6 @@ class _ProcedureScreenState extends State<ProcedureScreen> {
       _descriptionShowError = false;
     }
 
-    if (_price.isEmpty) {
-      isValid = false;
-      _priceShowError = true;
-      _priceError = 'Debes ingresar un precio.';
-    } else {
-      double price = double.parse(_price);
-      if (price <= 0) {
-        isValid = false;
-        _priceShowError = true;
-        _priceError = 'Debes ingresar un precio mayor a cero.';
-      } else {
-        _priceShowError = false;
-      }
-    }
-
     setState(() {});
     return isValid;
   }
@@ -191,28 +141,27 @@ class _ProcedureScreenState extends State<ProcedureScreen> {
       _showLoader = true;
     });
 
-var connectivityResult = await Connectivity().checkConnectivity();
+    var connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult == ConnectivityResult.none) {
       setState(() {
         _showLoader = false;
       });
       await showAlertDialog(
-        context: context,
-        title: 'Error', 
-        message: 'Verifica que estes conectado a internet.',
-        actions: <AlertDialogAction>[
+          context: context,
+          title: 'Error',
+          message: 'Verifica que estes conectado a internet.',
+          actions: <AlertDialogAction>[
             AlertDialogAction(key: null, label: 'Aceptar'),
-        ]
-      );    
+          ]);
       return;
     }
+
     Map<String, dynamic> request = {
       'description': _description,
-      'price': double.parse(_price),
     };
 
     Response response =
-        await ApiHelper.post('/api/Procedures/', request, widget.token);
+        await ApiHelper.post('/api/Brands/', request, widget.token);
 
     setState(() {
       _showLoader = false;
@@ -236,30 +185,29 @@ var connectivityResult = await Connectivity().checkConnectivity();
     setState(() {
       _showLoader = true;
     });
+
     var connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult == ConnectivityResult.none) {
       setState(() {
         _showLoader = false;
       });
       await showAlertDialog(
-        context: context,
-        title: 'Error', 
-        message: 'Verifica que estes conectado a internet.',
-        actions: <AlertDialogAction>[
+          context: context,
+          title: 'Error',
+          message: 'Verifica que estes conectado a internet.',
+          actions: <AlertDialogAction>[
             AlertDialogAction(key: null, label: 'Aceptar'),
-        ]
-      );    
+          ]);
       return;
     }
 
     Map<String, dynamic> request = {
-      'id': widget.procedure.id,
+      'id': widget.brand.id,
       'description': _description,
-      'price': double.parse(_price),
     };
 
-    Response response = await ApiHelper.put('/api/Procedures/',
-        widget.procedure.id.toString(), request, widget.token);
+    Response response = await ApiHelper.put(
+        '/api/Brands/', widget.brand.id.toString(), request, widget.token);
 
     setState(() {
       _showLoader = false;
@@ -298,24 +246,24 @@ var connectivityResult = await Connectivity().checkConnectivity();
     setState(() {
       _showLoader = true;
     });
+
     var connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult == ConnectivityResult.none) {
       setState(() {
         _showLoader = false;
       });
       await showAlertDialog(
-        context: context,
-        title: 'Error', 
-        message: 'Verifica que estes conectado a internet.',
-        actions: <AlertDialogAction>[
+          context: context,
+          title: 'Error',
+          message: 'Verifica que estes conectado a internet.',
+          actions: <AlertDialogAction>[
             AlertDialogAction(key: null, label: 'Aceptar'),
-        ]
-      );    
+          ]);
       return;
     }
 
     Response response = await ApiHelper.delete(
-        '/api/Procedures/', widget.procedure.id.toString(), widget.token);
+        '/api/Brands/', widget.brand.id.toString(), widget.token);
 
     setState(() {
       _showLoader = false;
