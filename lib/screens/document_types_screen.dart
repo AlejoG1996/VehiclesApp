@@ -85,7 +85,7 @@ class _DocumentTypesScreenState extends State<DocumentTypesScreen> {
       return;
     }
 
-    Response response = await ApiHelper.getDocumentType(widget.token);
+    Response response = await ApiHelper.getDocumentType();
 
     setState(() {
       _showLoader = false;

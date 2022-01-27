@@ -10,6 +10,7 @@ class User {
   String imageId = '';
   String imageFullPath = '';
   int userType = 1;
+  int loginType = 0;
   String fullName = '';
   List<Vehicle> vehicles = [];
   int vehiclesCount = 0;
@@ -27,6 +28,7 @@ class User {
     required this.imageId,
     required this.imageFullPath,
     required this.userType,
+    required this.loginType,
     required this.fullName,
     required this.vehicles,
     required this.vehiclesCount,
@@ -45,6 +47,7 @@ class User {
     imageId = json['imageId'];
     imageFullPath = json['imageFullPath'];
     userType = json['userType'];
+     loginType = json['loginType'];
     fullName = json['fullName'];
     if (json['vehicles'] != null) {
       vehicles = [];
@@ -57,7 +60,6 @@ class User {
     userName = json['userName'];
     email = json['email'];
     phoneNumber = json['phoneNumber'];
-
   }
 
   Map<String, dynamic> toJson() {
@@ -70,6 +72,7 @@ class User {
     data['imageId'] = this.imageId;
     data['imageFullPath'] = this.imageFullPath;
     data['userType'] = this.userType;
+    data['loginType'] = this.loginType;
     data['fullName'] = this.fullName;
     data['vehicles'] = this.vehicles.map((v) => v.toJson()).toList();
     data['vehiclesCount'] = this.vehiclesCount;
@@ -77,7 +80,7 @@ class User {
     data['userName'] = this.userName;
     data['email'] = this.email;
     data['phoneNumber'] = this.phoneNumber;
-  
+
     return data;
   }
 }

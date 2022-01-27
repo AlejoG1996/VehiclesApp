@@ -269,6 +269,7 @@ var connectivityResult = await Connectivity().checkConnectivity();
         MaterialPageRoute(
             builder: (context) => UserScreen(
                   token: widget.token,
+                  myprofile: false,
                   user: User(
                     firstName: '',
                     lastName: '',
@@ -278,6 +279,7 @@ var connectivityResult = await Connectivity().checkConnectivity();
                     imageId: '',
                     imageFullPath: '',
                     userType: 1,
+                    loginType: 0,
                     fullName: '',
                     vehicles: [],
                     vehiclesCount: 0,
@@ -299,6 +301,7 @@ var connectivityResult = await Connectivity().checkConnectivity();
             builder: (context) => UserInfoScreen(
                   token: widget.token,
                   user: user,
+                  isAdmin: true,
                 )));
     if (result == 'yes') {
       _getUsers();

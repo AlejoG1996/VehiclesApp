@@ -1,13 +1,17 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:vehicle_app/models/token.dart';
 import 'package:vehicle_app/screens/brands_screen.dart';
 import 'package:vehicle_app/screens/document_types_screen.dart';
 import 'package:vehicle_app/screens/login_screen.dart';
 import 'package:vehicle_app/screens/procedures_screen.dart';
+import 'package:vehicle_app/screens/user_info_screen.dart';
+import 'package:vehicle_app/screens/user_screen.dart';
 import 'package:vehicle_app/screens/users_screen.dart';
 import 'package:vehicle_app/screens/vehicle_types_screen.dart';
+import 'package:whatsapp_unilink/whatsapp_unilink.dart';
 
 class HomeScreen extends StatefulWidget {
   final Token token;
@@ -33,39 +37,102 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _getBody() {
-    return Container(
-      margin: EdgeInsets.all(30),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(150),
-            child: 
-            CachedNetworkImage(
-              imageUrl: widget.token.user.imageFullPath ,
-              errorWidget: (context, url, error) => Icon(Icons.error),
-                fit: BoxFit.cover,
-                 height: 300,
-                width: 300,
-                placeholder: (context, url) => Image(
-                  image: AssetImage('assets/fuego.png'),
-                   fit: BoxFit.cover,
-                   height: 300,
-                width: 300,),
-             )
-          ),
-          SizedBox(
-            height: 30,
-          ),
-          Center(
-            child: Text(
-              'Bienvenid@ ${widget.token.user.fullName}',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+    return SingleChildScrollView(
+      child: Container(
+        margin: EdgeInsets.all(30),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ClipRRect(
+                borderRadius: BorderRadius.circular(150),
+                child: CachedNetworkImage(
+                  imageUrl: widget.token.user.imageFullPath,
+                  errorWidget: (context, url, error) => Icon(Icons.error),
+                  fit: BoxFit.cover,
+                  height: 300,
+                  width: 300,
+                  placeholder: (context, url) => Image(
+                    image: AssetImage('assets/fuego.png'),
+                    fit: BoxFit.cover,
+                    height: 300,
+                    width: 300,
+                  ),
+                )),
+            SizedBox(
+              height: 30,
             ),
-          ),
-        ],
+            Center(
+              child: Text(
+                'Bienvenid@ ${widget.token.user.fullName}',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text('Llamar al taller'),
+                SizedBox(
+                  width: 10,
+                ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    height: 40,
+                    width: 40,
+                    color: Colors.blue,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.call,
+                        color: Colors.white,
+                      ),
+                      onPressed: () => launch("tel://+573054325671"),
+                    ),
+                  ),
+                )
+              ],
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text('Enviar mensaje al taller'),
+                SizedBox(
+                  width: 10,
+                ),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    height: 40,
+                    width: 40,
+                    color: Colors.green,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.insert_comment,
+                        color: Colors.white,
+                      ),
+                      onPressed: () => _sendMessage(),
+                    ),
+                  ),
+                )
+              ],
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  void _sendMessage() async {
+    final link = WhatsAppUnilink(
+      phoneNumber: '+573054325671',
+      text: 'Hola soy ${widget.token.user.fullName} cliente del taller',
+    );
+    await launch('$link');
   }
 
   Widget _getMechanicMenu() {
@@ -147,7 +214,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ListTile(
             leading: Icon(Icons.face),
             title: const Text('Editar perfil'),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => UserScreen(
+                            token: widget.token,
+                            user: widget.token.user,
+                            myprofile: true,
+                          )));
+            },
           ),
           ListTile(
             leading: Icon(Icons.logout),
@@ -174,7 +250,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ListTile(
             leading: Icon(Icons.two_wheeler),
             title: const Text('Mis Vehiculos'),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => UserInfoScreen(
+                            token: widget.token,
+                            user: widget.token.user,
+                            isAdmin: false,
+                          )));
+            },
           ),
           Divider(
             color: Colors.black,
@@ -183,7 +268,16 @@ class _HomeScreenState extends State<HomeScreen> {
           ListTile(
             leading: Icon(Icons.face),
             title: const Text('Editar perfil'),
-            onTap: () {},
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => UserScreen(
+                            token: widget.token,
+                            user: widget.token.user,
+                            myprofile: true,
+                          )));
+            },
           ),
           ListTile(
             leading: Icon(Icons.logout),

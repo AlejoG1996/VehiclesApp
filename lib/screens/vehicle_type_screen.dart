@@ -56,7 +56,7 @@ class _VehicleTypeScreenState extends State<VehicleTypeScreen> {
     return Container(
       padding: EdgeInsets.all(10),
       child: TextField(
-        autofocus: true,
+        
         controller: _descriptionController,
         decoration: InputDecoration(
           hintText: 'Ingresa una descripción...',

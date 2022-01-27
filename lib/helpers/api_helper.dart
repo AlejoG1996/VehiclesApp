@@ -104,10 +104,8 @@ class ApiHelper {
     return Response(isSucces: true, result: list);
   }
 
-  static Future<Response> getDocumentType(Token token) async {
-    if (!_validToken(token)) {
-      return Response(isSucces: false, message: 'Sus credenciales se han vencido, por favor cierre sesión y vuelva a ingresar al sistema.');
-    }
+  static Future<Response> getDocumentType() async {
+    
 
     var url = Uri.parse('${Constans.apiUrl}/api/DocumentTypes');
     var response = await http.get(
@@ -115,7 +113,7 @@ class ApiHelper {
       headers: {
         'content-type': 'application/json',
         'accept': 'application/json',
-        'authorization': 'bearer ${token.token}',
+        
       },
     );
 
@@ -326,4 +324,24 @@ class ApiHelper {
 
     return false;
   }
+
+static Future<Response> postNoToken(String controller, Map<String, dynamic> request) async {
+    
+    var url = Uri.parse('${Constans.apiUrl}$controller');
+    var response = await http.post(
+      url,
+      headers: {
+        'content-type' : 'application/json',
+        'accept' : 'application/json',
+      },
+      body: jsonEncode(request),
+    );
+
+    if (response.statusCode >= 400) {
+      return Response(isSucces: false, message: response.body);
+    }
+
+    return Response(isSucces: true);
+  }
+
 }

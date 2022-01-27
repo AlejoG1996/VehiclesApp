@@ -6,23 +6,21 @@ class LoaderComponent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+   return Center(
       child: Container(
         width: 200,
         height: 100,
         decoration: BoxDecoration(
-            color: Colors.yellow[300], borderRadius: BorderRadius.circular(10)),
+          color: Color(0xFFFFEB3B),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.black),
+        ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             CircularProgressIndicator(),
-            SizedBox(
-              height: 20,
-            ),
-            Text(
-              text,
-              style: TextStyle(fontSize: 20),
-            ),
+            SizedBox(height: 20,),
+            Text(text, style: TextStyle(fontSize: 20),),
           ],
         ),
       ),

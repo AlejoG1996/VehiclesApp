@@ -2,6 +2,7 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:vehicle_app/components/loader_component.dart';
 import 'package:vehicle_app/helpers/api_helper.dart';
 import 'package:vehicle_app/models/Vehicle_type.dart';
@@ -13,12 +14,15 @@ import 'package:vehicle_app/models/vehicle.dart';
 import 'package:vehicle_app/screens/user_screen.dart';
 import 'package:vehicle_app/screens/vehicle_info_screen.dart';
 import 'package:vehicle_app/screens/vehicle_screen.dart';
+import 'package:whatsapp_unilink/whatsapp_unilink.dart';
 
 class UserInfoScreen extends StatefulWidget {
   final Token token;
   final User user;
+  final bool isAdmin;
 
-  UserInfoScreen({required this.token, required this.user});
+  UserInfoScreen(
+      {required this.token, required this.user, required this.isAdmin});
 
   @override
   _UserInfoScreenState createState() => _UserInfoScreenState();
@@ -223,6 +227,10 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                             ),
                           ],
                         ),
+                        SizedBox(
+                          height: 5,
+                        ),
+                        widget.isAdmin ? _showCallButtons() : Container()
                       ],
                     ),
                   ),
@@ -242,6 +250,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
             builder: (context) => UserScreen(
                   token: widget.token,
                   user: _user,
+                  myprofile: false,
                 )));
     if (result == 'yes') {
       //TODO:PENDINGREFRESH
@@ -295,7 +304,11 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
         context,
         MaterialPageRoute(
             builder: (context) => VehicleInfoScreen(
-                token: widget.token, user: _user, vehicle: vehicle)));
+                  token: widget.token,
+                  user: _user,
+                  vehicle: vehicle,
+                  isAdmin: widget.isAdmin,
+                )));
     if (result == 'yes') {
       _getUser();
     }
@@ -389,6 +402,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                                     style: TextStyle(
                                       fontSize: 14,
                                     ),
+                                    
                                   ),
                                   SizedBox(
                                     width: 5,
@@ -401,6 +415,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                                   ),
                                 ],
                               )
+                              
                             ],
                           )
                         ],
@@ -433,5 +448,57 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
         ),
       ),
     );
+  }
+
+  Widget _showCallButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[
+        ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            height: 40,
+            width: 40,
+            color: Colors.blue,
+            child: IconButton(
+              icon: Icon(
+                Icons.call,
+                color: Colors.white,
+              ),
+              onPressed: () => launch('tel://${widget.user.phoneNumber}'),
+            ),
+          ),
+        ),
+        SizedBox(
+          width: 10,
+        ),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Container(
+            height: 40,
+            width: 40,
+            color: Colors.green,
+            child: IconButton(
+              icon: Icon(
+                Icons.insert_comment,
+                color: Colors.white,
+              ),
+              onPressed: () => _sendMessage(),
+            ),
+          ),
+        ),
+        SizedBox(
+          width: 10,
+        ),
+      ],
+    );
+  }
+
+  void _sendMessage() async {
+    final link = WhatsAppUnilink(
+      phoneNumber: '${widget.user.phoneNumber}',
+      text: 'Hola te escribo del taller.',
+    );
+    await launch('$link');
   }
 }

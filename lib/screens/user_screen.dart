@@ -16,14 +16,17 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:vehicle_app/components/loader_component.dart';
 import 'package:vehicle_app/helpers/api_helper.dart';
 import 'package:vehicle_app/models/response.dart';
+import 'package:vehicle_app/screens/change_password_screen.dart';
 
 import 'package:vehicle_app/screens/take_picture_screen.dart';
 
 class UserScreen extends StatefulWidget {
   final Token token;
   final User user;
+  final bool myprofile;
 
-  UserScreen({required this.token, required this.user});
+  UserScreen(
+      {required this.token, required this.user, required this.myprofile});
 
   @override
   _UserScreenState createState() => _UserScreenState();
@@ -74,25 +77,7 @@ class _UserScreenState extends State<UserScreen> {
     super.initState();
     _getDocumentType();
 
-    _firstname = widget.user.firstName;
-    _firstnameController.text = _firstname;
-
-    _lastName = widget.user.lastName;
-    _lastNameController.text = _lastName;
-
-    _documentTypeId = widget.user.documentType.id;
-
-    _document = widget.user.document;
-    _documentController.text = _document;
-
-    _address = widget.user.address;
-    _addressController.text = _address;
-
-    _email = widget.user.email;
-    _emailController.text = _email;
-
-    _phoneNumber = widget.user.phoneNumber;
-    _phoneNumberController.text = _phoneNumber;
+    _loadFieldValues();
   }
 
   @override
@@ -131,7 +116,7 @@ class _UserScreenState extends State<UserScreen> {
     return Container(
       padding: EdgeInsets.all(10),
       child: TextField(
-        autofocus: true,
+       
         controller: _firstnameController,
         decoration: InputDecoration(
           hintText: 'Ingresa  nombres...',
@@ -172,18 +157,33 @@ class _UserScreenState extends State<UserScreen> {
                 ),
           widget.user.id.isEmpty
               ? Container()
-              : Expanded(
-                  child: ElevatedButton(
-                    child: Text('Borrar'),
-                    style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.resolveWith<Color>(
-                          (Set<MaterialState> states) {
-                        return Color(0xFFE21717);
-                      }),
+              : widget.myprofile
+                  ? Expanded(
+                      child: ElevatedButton(
+                        child: Text('Cambiar Contraseña'),
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.resolveWith<Color>(
+                                  (Set<MaterialState> states) {
+                            return Color(0xFFE21717);
+                          }),
+                        ),
+                        onPressed: () => _changepassword(),
+                      ),
+                    )
+                  : Expanded(
+                      child: ElevatedButton(
+                        child: Text('Borrar'),
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.resolveWith<Color>(
+                                  (Set<MaterialState> states) {
+                            return Color(0xFFE21717);
+                          }),
+                        ),
+                        onPressed: () => confirmDelete(),
+                      ),
                     ),
-                    onPressed: () => confirmDelete(),
-                  ),
-                ),
         ],
       ),
     );
@@ -416,8 +416,8 @@ class _UserScreenState extends State<UserScreen> {
       return;
     }
 
-    Response response = await ApiHelper.delete(
-        '/api/Users/', widget.user.id, widget.token);
+    Response response =
+        await ApiHelper.delete('/api/Users/', widget.user.id, widget.token);
 
     setState(() {
       _showLoader = false;
@@ -454,19 +454,20 @@ class _UserScreenState extends State<UserScreen> {
                   child: _photoChanged
                       ? Image.file(File(_image.path),
                           width: 160, height: 160, fit: BoxFit.cover)
-                      :  CachedNetworkImage(
-                  imageUrl: widget.user.imageFullPath,
-                  errorWidget: (context, url, error) => Icon(Icons.error),
-                  fit: BoxFit.cover,
-                  height: 160,
-                  width: 160,
-                  placeholder: (context, url) => Image(
-                    image: AssetImage('assets/fuego.png'),
-                     fit: BoxFit.cover,
-                    height: 160,
-                    width: 160,
-                  ),
-                ),
+                      : CachedNetworkImage(
+                          imageUrl: widget.user.imageFullPath,
+                          errorWidget: (context, url, error) =>
+                              Icon(Icons.error),
+                          fit: BoxFit.cover,
+                          height: 160,
+                          width: 160,
+                          placeholder: (context, url) => Image(
+                            image: AssetImage('assets/fuego.png'),
+                            fit: BoxFit.cover,
+                            height: 160,
+                            width: 160,
+                          ),
+                        ),
                 ),
         ),
         Positioned(
@@ -639,7 +640,7 @@ class _UserScreenState extends State<UserScreen> {
       _showLoader = true;
     });
 
-    Response response = await ApiHelper.getDocumentType(widget.token);
+    Response response = await ApiHelper.getDocumentType();
 
     setState(() {
       _showLoader = false;
@@ -680,6 +681,12 @@ class _UserScreenState extends State<UserScreen> {
   }
 
   void _takePicture() async {
+
+    if (widget.user.loginType != 0) {
+      _validateUserSocial();
+      return;
+    }
+
     WidgetsFlutterBinding.ensureInitialized();
     final cameras = await availableCameras();
     final firstcamera = cameras.first;
@@ -697,7 +704,25 @@ class _UserScreenState extends State<UserScreen> {
     }
   }
 
+   void _validateUserSocial() async {
+      await showAlertDialog(
+        context: context,
+        title: 'Error', 
+        message: 'Debes de realizar esta operación por la red social con la que iniciaste sesión.',
+        actions: <AlertDialogAction>[
+            AlertDialogAction(key: null, label: 'Aceptar'),
+        ]
+      );    
+  }
+
   void _selectPicture() async {
+
+      if (widget.user.loginType != 0) {
+      _validateUserSocial();
+      return;
+    }
+
+
     final ImagePicker _picker = ImagePicker();
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
@@ -708,4 +733,36 @@ class _UserScreenState extends State<UserScreen> {
     }
   }
 
+  void _loadFieldValues() {
+    _firstname = widget.user.firstName;
+    _firstnameController.text = _firstname;
+
+    _lastName = widget.user.lastName;
+    _lastNameController.text = _lastName;
+
+    _documentTypeId = widget.user.documentType.id;
+
+    _document = widget.user.document;
+    _documentController.text = _document;
+
+    _address = widget.user.address;
+    _addressController.text = _address;
+
+    _email = widget.user.email;
+    _emailController.text = _email;
+
+    _phoneNumber = widget.user.phoneNumber;
+    _phoneNumberController.text = _phoneNumber;
+  }
+
+  void _changepassword() {
+     if (widget.user.loginType != 0) {
+      _validateUserSocial();
+      return;
+    }
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ChangePasswordScreen(token: widget.token)));
+  }
 }
