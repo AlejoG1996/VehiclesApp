@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:camera/camera.dart';
 import 'package:connectivity/connectivity.dart';
+import 'package:country_picker/country_picker.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -25,6 +26,8 @@ class _RegisterUserScreenState extends State<RegisterUserScreen> {
   bool _passwordShow = false;
   bool _photoChanged = false;
   late XFile _image;
+  String _countryName = 'Colombia (CO)';
+  String _countryCode = '57';
 
   String _firstName = '';
   String _firstNameError = '';
@@ -95,6 +98,7 @@ class _RegisterUserScreenState extends State<RegisterUserScreen> {
                 _showDocument(),
                 _showEmail(),
                 _showAddress(),
+                _showCountry(),
                 _showPhoneNumber(),
                 _showPassword(),
                 _showConfirm(),
@@ -109,6 +113,42 @@ class _RegisterUserScreenState extends State<RegisterUserScreen> {
               : Container(),
         ],
       ),
+    );
+  }
+
+  Widget _showCountry() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10),
+      child: Row(
+        children: <Widget>[
+          ElevatedButton(
+            child: Text('Seleccionar País'),
+            style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.resolveWith<Color>(
+                  (Set<MaterialState> states) {
+                return Color(0xFFE03B8B);
+              }),
+            ),
+            onPressed: () => _selectCountry(),
+          ),
+          SizedBox(
+            width: 10,
+          ),
+          Text('$_countryCode $_countryName'),
+        ],
+      ),
+    );
+  }
+
+  void _selectCountry() {
+    showCountryPicker(
+      context: context,
+      onSelect: (Country country) {
+        setState(() {
+          _countryName = country.displayNameNoCountryCode;
+          _countryCode = country.phoneCode;
+        });
+      },
     );
   }
 
@@ -643,6 +683,7 @@ class _RegisterUserScreenState extends State<RegisterUserScreen> {
       'email': _email,
       'userName': _email,
       'address': _address,
+      'countryCode': _countryCode,
       'phoneNumber': _phoneNumber,
       'image': base64image,
       'password': _password,

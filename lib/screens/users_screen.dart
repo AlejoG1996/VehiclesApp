@@ -23,6 +23,7 @@ class UsersScreen extends StatefulWidget {
 
 class _UsersScreenState extends State<UsersScreen> {
   List<User> _users = [];
+  
 
   bool _showLoader = false;
 
@@ -64,20 +65,18 @@ class _UsersScreenState extends State<UsersScreen> {
       _showLoader = true;
     });
 
-
-var connectivityResult = await Connectivity().checkConnectivity();
+    var connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult == ConnectivityResult.none) {
       setState(() {
         _showLoader = false;
       });
       await showAlertDialog(
-        context: context,
-        title: 'Error', 
-        message: 'Verifica que estes conectado a internet.',
-        actions: <AlertDialogAction>[
+          context: context,
+          title: 'Error',
+          message: 'Verifica que estes conectado a internet.',
+          actions: <AlertDialogAction>[
             AlertDialogAction(key: null, label: 'Aceptar'),
-        ]
-      );    
+          ]);
       return;
     }
     Response response = await ApiHelper.getUsers(widget.token);
@@ -135,19 +134,19 @@ var connectivityResult = await Connectivity().checkConnectivity();
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(40),
-                      child:  CachedNetworkImage(
-                  imageUrl: e.imageFullPath,
-                  errorWidget: (context, url, error) => Icon(Icons.error),
-                  fit: BoxFit.cover,
-                  height: 80,
-                  width: 80,
-                  placeholder: (context, url) => Image(
-                    image: AssetImage('assets/fuego.png'),
-                     fit: BoxFit.cover,
-                    height: 80,
-                    width: 80,
-                  ),
-                ),
+                      child: CachedNetworkImage(
+                        imageUrl: e.imageFullPath,
+                        errorWidget: (context, url, error) => Icon(Icons.error),
+                        fit: BoxFit.cover,
+                        height: 80,
+                        width: 80,
+                        placeholder: (context, url) => Image(
+                          image: AssetImage('assets/fuego.png'),
+                          fit: BoxFit.cover,
+                          height: 80,
+                          width: 80,
+                        ),
+                      ),
                     ),
                     Expanded(
                       child: Container(
@@ -176,7 +175,7 @@ var connectivityResult = await Connectivity().checkConnectivity();
                                   height: 5,
                                 ),
                                 Text(
-                                  e.phoneNumber,
+                                  '+${e.countryCode} ${e.phoneNumber}',
                                   style: TextStyle(
                                     fontSize: 14,
                                   ),
@@ -286,6 +285,7 @@ var connectivityResult = await Connectivity().checkConnectivity();
                     id: '',
                     userName: '',
                     email: '',
+                    countryCode: "57",
                     phoneNumber: '',
                   ),
                 )));

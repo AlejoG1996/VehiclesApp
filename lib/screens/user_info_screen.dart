@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vehicle_app/components/loader_component.dart';
 import 'package:vehicle_app/helpers/api_helper.dart';
+import 'package:vehicle_app/helpers/regex_helper.dart';
 import 'package:vehicle_app/models/Vehicle_type.dart';
 import 'package:vehicle_app/models/brand.dart';
 import 'package:vehicle_app/models/response.dart';
@@ -203,7 +204,7 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                             Text(
-                              _user.phoneNumber,
+                              '+${_user.countryCode} ${_user.phoneNumber}',
                               style: TextStyle(
                                 fontSize: 14,
                               ),
@@ -402,7 +403,6 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                                     style: TextStyle(
                                       fontSize: 14,
                                     ),
-                                    
                                   ),
                                   SizedBox(
                                     width: 5,
@@ -415,7 +415,6 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                                   ),
                                 ],
                               )
-                              
                             ],
                           )
                         ],
@@ -465,7 +464,8 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
                 Icons.call,
                 color: Colors.white,
               ),
-              onPressed: () => launch('tel://${widget.user.phoneNumber}'),
+              onPressed: () => launch(
+                  'tel://+${widget.user.countryCode} ${RegexHelper.removeBlankSpaces(widget.user.phoneNumber)}'),
             ),
           ),
         ),
@@ -496,7 +496,8 @@ class _UserInfoScreenState extends State<UserInfoScreen> {
 
   void _sendMessage() async {
     final link = WhatsAppUnilink(
-      phoneNumber: '${widget.user.phoneNumber}',
+      phoneNumber:
+          '+${widget.user.countryCode}${RegexHelper.removeBlankSpaces(widget.user.phoneNumber)}',
       text: 'Hola te escribo del taller.',
     );
     await launch('$link');

@@ -20,6 +20,7 @@ class Token {
     id: '',
     userName: '',
     email: '',
+    countryCode: "57",
     phoneNumber: '',
   );
 

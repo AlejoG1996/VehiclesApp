@@ -186,31 +186,50 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _loginFacebook() async {
-    await FacebookAuth.i.login();
+
+     setState(() {
+      _showLoader = true;
+    });
+
+    await FacebookAuth.i.logOut();
     var result = await FacebookAuth.i.login(
       permissions: ["public_profile", "email"],
     );
 
-    if (result.status == LoginStatus.success) {
-      final requestData = await FacebookAuth.i.getUserData(
-        fields:
-            "email, name, picture.width(800).heigth(800), first_name, last_name",
-      );
-
-      var picture = requestData['picture'];
-      var data = picture['data'];
-
-      Map<String, dynamic> request = {
-        'email': requestData['email'],
-        'id': requestData['id'],
-        'loginType': 2,
-        'fullName': requestData['name'],
-        'photoURL': data['url'],
-        'firtsName': requestData['first_name'],
-        'lastName': requestData['last_name'],
-      };
-      await _socialLogin(request);
+    if (result.status != LoginStatus.success) {
+      setState(() {
+        _showLoader = false;
+      });
+ 
+      await showAlertDialog(
+        context: context,
+        title: 'Error',
+        message: 'Hubo un problema al obtener el usuario de Facebook, por favor intenta más tarde.',
+        actions: <AlertDialogAction>[
+            AlertDialogAction(key: null, label: 'Aceptar'),
+        ]
+      );    
+      return;
     }
+
+    final requestData = await FacebookAuth.i.getUserData(
+      fields: "email, name, picture.width(800).heigth(800), first_name, last_name",
+    );
+
+    var picture = requestData['picture'];
+    var data = picture['data'];
+
+    Map<String, dynamic> request = {
+      'email': requestData['email'],
+      'id': requestData['id'],
+      'loginType': 2,
+      'fullName': requestData['name'],
+      'photoURL': data['url'],
+      'firtsName': requestData['first_name'],
+      'lastName': requestData['last_name'],
+    };
+
+    await _socialLogin(request);
   }
 
   Future _socialLogin(Map<String, dynamic> request) async {
@@ -432,10 +451,40 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _loginGoogle() async {
+    setState(() {
+      _showLoader = true;
+    });
+
     var googleSignIn = GoogleSignIn();
     await googleSignIn.signOut();
     var user = await googleSignIn.signIn();
 
-    print(user);
+    Map<String, dynamic> request = {
+      'email': user?.email,
+      'id': user?.id,
+      'loginType': 1,
+      'fullName': user?.displayName,
+      'photoURL': user?.photoUrl,
+    };
+
+    if (user == null) {
+      setState(() {
+        _showLoader = false;
+      });
+ 
+      await showAlertDialog(
+        context: context,
+        title: 'Error',
+        message: 'Hubo un problema al obtener el usuario de Google, por favor intenta más tarde.',
+        actions: <AlertDialogAction>[
+            AlertDialogAction(key: null, label: 'Aceptar'),
+        ]
+      );    
+      return;
+    }
+
+    
+
+    await _socialLogin(request);
   }
 }
